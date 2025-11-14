@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/lib/auth-context";
 
 const categories = [
   { id: "government", name: "정부지원", path: "/category/government", icon: "🏛️" },
@@ -16,8 +17,28 @@ const categories = [
 export const Header: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  // 프로필 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    if (profileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileMenuOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,12 +130,47 @@ export const Header: React.FC = () => {
               <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
             </button>
 
-            {/* 프로필 */}
-            <button className="p-2 rounded-xl hover:bg-badge transition-colors">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary text-body-s font-medium">내</span>
+            {/* 로그인/프로필 */}
+            {user ? (
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="p-2 rounded-xl hover:bg-badge transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary text-body-s font-medium">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </button>
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-xl shadow-card py-2 z-50">
+                    <div className="px-4 py-2 border-b border-border">
+                      <p className="text-body-s font-medium text-text-primary">{user.name}</p>
+                      <p className="text-caption text-text-muted">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setProfileMenuOpen(false);
+                        router.push("/");
+                      }}
+                      className="w-full text-left px-4 py-2 text-body-s text-text-secondary hover:bg-badge transition-colors"
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                )}
               </div>
-            </button>
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => router.push("/login")}
+              >
+                로그인
+              </Button>
+            )}
           </div>
         </div>
 

@@ -117,31 +117,17 @@ export const InfoCard: React.FC<InfoCardProps> = ({
               상세 보기
             </Button>
           )}
-          {applicationUrl ? (
-            <Button
-              variant="primary"
-              size="sm"
-              className="flex-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(applicationUrl, "_blank", "noopener,noreferrer");
-              }}
-            >
-              신청하기
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              size="sm"
-              className="flex-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                // 자격 진단 기능 (추후 구현)
-              }}
-            >
-              자격 진단
-            </Button>
-          )}
+          <Button
+            variant="primary"
+            size="sm"
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              // 자격 진단 기능 (추후 구현)
+            }}
+          >
+            자격 진단
+          </Button>
         </div>
       </div>
     </Card>

@@ -70,9 +70,37 @@ npm install
 2. 환경 변수 설정:
 ```bash
 # .env.local 파일 생성
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Google OAuth (선택사항)
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# Kakao OAuth (선택사항)
+KAKAO_CLIENT_ID=your_kakao_client_id_here
+KAKAO_CLIENT_SECRET=your_kakao_client_secret_here
+
+# 데이터 수집 (선택사항)
 PUBLIC_DATA_API_KEY=your_api_key_here
 CRON_SECRET=your_cron_secret_here
 ```
+
+### OAuth 설정 (구글/카카오 로그인)
+
+#### Google OAuth 설정
+1. [Google Cloud Console](https://console.cloud.google.com/)에서 프로젝트 생성
+2. OAuth 2.0 클라이언트 ID 생성
+3. 승인된 리디렉션 URI에 추가: `http://localhost:3000/api/auth/google/callback` (개발), `https://your-domain.com/api/auth/google/callback` (프로덕션)
+4. `.env.local`에 `GOOGLE_CLIENT_ID`와 `GOOGLE_CLIENT_SECRET` 설정
+
+#### Kakao OAuth 설정
+1. [Kakao Developers](https://developers.kakao.com/)에서 앱 생성
+2. 플랫폼 설정에서 사이트 도메인 등록
+3. 카카오 로그인 활성화
+4. Redirect URI 등록: `http://localhost:3000/api/auth/kakao/callback` (개발), `https://your-domain.com/api/auth/kakao/callback` (프로덕션)
+5. `.env.local`에 `KAKAO_CLIENT_ID`와 `KAKAO_CLIENT_SECRET` 설정
+
+**참고**: OAuth 설정 없이도 일반 이메일/비밀번호 로그인은 사용할 수 있습니다.
 
 3. 개발 서버 실행:
 ```bash
@@ -155,10 +183,11 @@ moneypick/
 - ✅ 정부24 데이터 자동 수집 시스템
 - ✅ API 엔드포인트 (데이터 제공 및 갱신)
 - ✅ 자동 갱신 스케줄러 (Vercel Cron Jobs)
+- ✅ 사용자 인증 (이메일/비밀번호, 구글, 카카오)
+- ✅ 소셜 로그인 (구글, 카카오톡)
 - ⏳ 자격 진단 기능 (예정)
 - ⏳ 즐겨찾기/저장 기능 (예정)
 - ⏳ 알림 기능 (예정)
-- ⏳ 사용자 인증 (예정)
 
 ## 데이터 소스
 
