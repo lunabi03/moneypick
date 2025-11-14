@@ -12,6 +12,8 @@ interface InfoCardProps {
   deadline?: string;
   difficulty?: string;
   matchRate?: number;
+  sourceUrl?: string;
+  applicationUrl?: string;
   onClick?: () => void;
 }
 
@@ -24,6 +26,8 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   deadline,
   difficulty,
   matchRate,
+  sourceUrl,
+  applicationUrl,
   onClick,
 }) => {
   return (
@@ -96,12 +100,48 @@ export const InfoCard: React.FC<InfoCardProps> = ({
 
         {/* 액션 버튼 */}
         <div className="flex gap-2 pt-2">
-          <Button variant="ghost" size="sm" className="flex-1">
-            상세 보기
-          </Button>
-          <Button variant="primary" size="sm" className="flex-1">
-            자격 진단
-          </Button>
+          {sourceUrl ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(sourceUrl, "_blank", "noopener,noreferrer");
+              }}
+            >
+              상세 보기
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" className="flex-1" disabled>
+              상세 보기
+            </Button>
+          )}
+          {applicationUrl ? (
+            <Button
+              variant="primary"
+              size="sm"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(applicationUrl, "_blank", "noopener,noreferrer");
+              }}
+            >
+              신청하기
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                // 자격 진단 기능 (추후 구현)
+              }}
+            >
+              자격 진단
+            </Button>
+          )}
         </div>
       </div>
     </Card>

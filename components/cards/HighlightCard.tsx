@@ -15,6 +15,8 @@ interface HighlightCardProps {
   savedItems?: Array<{ name: string; deadline: string }>;
   ctaText?: string;
   onCtaClick?: () => void;
+  sourceUrl?: string;
+  applicationUrl?: string;
   className?: string;
   size?: "default" | "large";
 }
@@ -31,6 +33,8 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
   savedItems = [],
   ctaText = "신청하기",
   onCtaClick,
+  sourceUrl,
+  applicationUrl,
   className = "",
   size = "default",
 }) => {
@@ -161,7 +165,16 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
           <Button
             variant="primary"
             size={isLarge ? "lg" : "md"}
-            onClick={onCtaClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onCtaClick) {
+                onCtaClick();
+              } else if (sourceUrl) {
+                window.open(sourceUrl, "_blank", "noopener,noreferrer");
+              } else if (applicationUrl) {
+                window.open(applicationUrl, "_blank", "noopener,noreferrer");
+              }
+            }}
             className="w-full"
           >
             {ctaText}

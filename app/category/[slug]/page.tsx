@@ -11,16 +11,18 @@ const categoryData: Record<string, {
   title: string;
   description: string;
   icon: string;
-  programs: Array<{
-    title: string;
-    category: string;
-    description: string;
-    tags?: string[];
-    amount?: string;
-    deadline?: string;
-    difficulty?: string;
-    matchRate?: number;
-  }>;
+    programs: Array<{
+      title: string;
+      category: string;
+      description: string;
+      tags?: string[];
+      amount?: string;
+      deadline?: string;
+      difficulty?: string;
+      matchRate?: number;
+      sourceUrl?: string;
+      applicationUrl?: string;
+    }>;
 }> = {
   government: {
     title: "정부·공공 지원금 / 보조금",
@@ -28,54 +30,64 @@ const categoryData: Record<string, {
     icon: "🏛️",
     programs: [
       {
-        title: "청년 월세 특별지원",
+        title: "국민취업지원제도",
         category: "정부·공공 지원금",
-        description: "19~34세 무주택자, 월세 70만원 이하 대상",
-        tags: ["청년", "월세", "무주택자"],
-        amount: "최대 30만원/3개월",
-        deadline: "D-7",
-        difficulty: "보통",
-        matchRate: 78,
-      },
-      {
-        title: "신혼부부 주거지원금",
-        category: "정부·공공 지원금",
-        description: "혼인신고 후 7년 이내 부부 대상 주거비 지원",
-        tags: ["신혼부부", "주거", "지원금"],
-        amount: "최대 100만원",
-        deadline: "D-15",
-        difficulty: "쉬움",
-        matchRate: 85,
-      },
-      {
-        title: "소상공인 경영안정자금",
-        category: "정부·공공 지원금",
-        description: "영세 소상공인 대상 경영안정 자금 대출 지원",
-        tags: ["소상공인", "대출", "경영안정"],
-        amount: "최대 3,000만원",
-        deadline: "D-20",
-        difficulty: "어려움",
-        matchRate: 65,
-      },
-      {
-        title: "청년 창업 지원금",
-        category: "정부·공공 지원금",
-        description: "39세 이하 청년 창업자 대상 창업 자금 지원",
-        tags: ["청년", "창업", "자금"],
-        amount: "최대 5,000만원",
-        deadline: "D-30",
-        difficulty: "어려움",
-        matchRate: 60,
-      },
-      {
-        title: "농어민 재해 복구 지원금",
-        category: "정부·공공 지원금",
-        description: "자연재해로 피해를 입은 농어민 대상 복구 지원",
-        tags: ["농어민", "재해", "복구"],
-        amount: "피해 규모에 따라",
-        deadline: "D-10",
+        description: "구직자 대상 취업지원서비스 및 생계안정 지원. 중위소득 60% 이하, 최근 2년 이내 취업경험 필수",
+        tags: ["구직", "청년", "취업", "생계지원"],
+        amount: "월 최대 60만원",
+        deadline: "상시",
         difficulty: "보통",
         matchRate: 70,
+        sourceUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200005007",
+        applicationUrl: "https://www.work24.go.kr",
+      },
+      {
+        title: "내집마련 디딤돌 대출",
+        category: "정부·공공 지원금",
+        description: "무주택자 대상 주택구입 대출. 최대 2.5억원, 연 2.45~3.55% 금리. 연소득 6천만원 이하(신혼가구 8.5천만원 이하)",
+        tags: ["신혼부부", "주거", "대출", "주택구입"],
+        amount: "최대 2.5억원",
+        deadline: "상시",
+        difficulty: "보통",
+        matchRate: 80,
+        sourceUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/B55140800003",
+        applicationUrl: "https://www.hf.go.kr",
+      },
+      {
+        title: "근로·자녀장려금",
+        category: "정부·공공 지원금",
+        description: "소득과 재산이 적은 근로소득자에게 근로장려금을, 자녀가 있을 경우 자녀장려금 지급",
+        tags: ["근로자", "자녀", "장려금", "소득지원"],
+        amount: "가구당 최대 300만원",
+        deadline: "상시",
+        difficulty: "쉬움",
+        matchRate: 85,
+        sourceUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/105100000001",
+        applicationUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/105100000001",
+      },
+      {
+        title: "국민내일배움카드",
+        category: "정부·공공 지원금",
+        description: "직업훈련을 희망하는 국민에게 직업능력개발훈련비와 훈련장려금 지원",
+        tags: ["직업훈련", "교육", "장려금"],
+        amount: "연 최대 300만원",
+        deadline: "상시",
+        difficulty: "보통",
+        matchRate: 75,
+        sourceUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200000026",
+        applicationUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/149200000026",
+      },
+      {
+        title: "출산전후(유산ㆍ사산)휴가 급여",
+        category: "정부·공공 지원금",
+        description: "출산전후(유산ㆍ사산)휴가 기간에 대한 급여 지원",
+        tags: ["출산", "휴가", "급여", "임신부"],
+        amount: "일당 최대 8만원",
+        deadline: "상시",
+        difficulty: "쉬움",
+        matchRate: 90,
+        sourceUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/WII000001460",
+        applicationUrl: "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/WII000001460",
       },
     ],
   },

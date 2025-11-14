@@ -1,57 +1,46 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { HighlightCard } from "@/components/cards/HighlightCard";
 import { InfoCard } from "@/components/cards/InfoCard";
 import { Button } from "@/components/ui/Button";
+import { GovernmentProgram } from "@/lib/types";
 
 export default function Home() {
+  const [governmentPrograms, setGovernmentPrograms] = useState<GovernmentProgram[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 정부 지원금 데이터 가져오기
+    fetch("/api/government-programs")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.programs) {
+          setGovernmentPrograms(data.programs);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("데이터 로드 오류:", error);
+        setLoading(false);
+      });
+  }, []);
+
   const highlightData = {
-    title: "정부 청년전세 대출 지원금",
-    description: "19~34세 무주택 청년 대상, 최대 2,000만원 전세자금 지원",
-    amount: "최대 2,000만원",
-    deadline: "D-3",
-    difficulty: "보통",
-    matchRate: 75,
-    tags: ["청년", "전세", "대출"],
-    badges: [{ label: "신규", variant: "new" as const }, { label: "마감 임박", variant: "urgent" as const }],
+    title: governmentPrograms[0]?.title || "국민취업지원제도",
+    description: governmentPrograms[0]?.description || "구직자 대상 취업지원서비스 및 생계안정 지원. 중위소득 60% 이하, 최근 2년 이내 취업경험 필수",
+    amount: governmentPrograms[0]?.amount || "월 최대 60만원",
+    deadline: governmentPrograms[0]?.deadline || "상시",
+    difficulty: governmentPrograms[0]?.difficulty || "보통",
+    matchRate: governmentPrograms[0]?.matchRate || 70,
+    tags: governmentPrograms[0]?.tags || ["구직", "청년", "취업", "생계지원"],
+    badges: [{ label: "신규", variant: "new" as const }, { label: "인기", variant: "verified" as const }],
+    sourceUrl: governmentPrograms[0]?.sourceUrl,
+    applicationUrl: governmentPrograms[0]?.applicationUrl,
     size: "large" as const,
   };
-
-  const governmentPrograms = [
-    {
-      title: "청년 월세 특별지원",
-      category: "정부·공공 지원금",
-      description: "19~34세 무주택자, 월세 70만원 이하 대상",
-      tags: ["청년", "월세", "무주택자"],
-      amount: "최대 30만원/3개월",
-      deadline: "D-7",
-      difficulty: "보통",
-      matchRate: 78,
-    },
-    {
-      title: "신혼부부 주거지원금",
-      category: "정부·공공 지원금",
-      description: "혼인신고 후 7년 이내 부부 대상 주거비 지원",
-      tags: ["신혼부부", "주거", "지원금"],
-      amount: "최대 100만원",
-      deadline: "D-15",
-      difficulty: "쉬움",
-      matchRate: 85,
-    },
-    {
-      title: "소상공인 경영안정자금",
-      category: "정부·공공 지원금",
-      description: "영세 소상공인 대상 경영안정 자금 대출 지원",
-      tags: ["소상공인", "대출", "경영안정"],
-      amount: "최대 3,000만원",
-      deadline: "D-20",
-      difficulty: "어려움",
-      matchRate: 65,
-    },
-  ];
 
   const sideJobPrograms = [
     {
@@ -133,11 +122,36 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {governmentPrograms.map((program, index) => (
-              <InfoCard key={index} {...program} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-surface rounded-card p-6 shadow-card animate-pulse">
+                  <div className="h-4 bg-badge rounded w-1/4 mb-4"></div>
+                  <div className="h-6 bg-badge rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-badge rounded w-full mb-2"></div>
+                  <div className="h-4 bg-badge rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {governmentPrograms.slice(0, 3).map((program) => (
+                <InfoCard
+                  key={program.id}
+                  title={program.title}
+                  category={program.category}
+                  description={program.description}
+                  tags={program.tags}
+                  amount={program.amount}
+                  deadline={program.deadline}
+                  difficulty={program.difficulty}
+                  matchRate={program.matchRate}
+                  sourceUrl={program.sourceUrl}
+                  applicationUrl={program.applicationUrl}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* 부업 / 재택근무 / 프리랜스 */}
@@ -282,4 +296,3 @@ export default function Home() {
     </div>
   );
 }
-

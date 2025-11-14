@@ -1,4 +1,4 @@
-# 머니픽(Moneypick)
+# 머니픽(MoneyPick)
 
 돈이 되는 정보를 한눈에 확인하고, 바로 행동으로 이어지도록 돕는 토스 스타일의 정보 허브입니다. 정부 지원금부터 부업, 할인 혜택까지 사용자의 상황에 맞는 인사이트를 빠르게 제공합니다.
 
@@ -16,7 +16,7 @@
   - 즐겨찾기/저장 콘텐츠 바로가기
 
 - **카테고리 탐색**
-  1. 정부·공공 지원금 / 보조금: 자격 진단, 신청 기한, 지원 난이도 안내
+  1. 정부·공공 지원금 / 보조금: 자격 진단, 신청 기한, 지원 난이도 안내 (정부24 데이터 자동 수집)
   2. 부업 / 재택근무 / 프리랜스 수익: 업무 유형, 소득 범위, 요구 스킬 필터
   3. 투자·자산·리셀(실물 경제형 수익): 위험도 인디케이터, 실물 시세 스냅샷
   4. 자기계발·자격증 기반 수익: 예상 학습 기간, 합격률, 교육비 정보
@@ -25,6 +25,11 @@
 - **검색 & 필터링**
   - 자연어 검색과 상세 조건 필터(지역, 소득, 난이도 등) 병행
   - 저장된 프로필을 기반으로 기본값 자동 적용
+
+- **데이터 자동 수집**
+  - 정부24 및 공공데이터포털에서 지원금/보조금 데이터 자동 수집
+  - 매일 자동으로 데이터 갱신 (Vercel Cron Jobs)
+  - API를 통한 실시간 데이터 제공
 
 - **알림 & 캘린더 연동**
   - 신청 마감, 신규 혜택, 관심사 업데이트 푸시
@@ -48,50 +53,6 @@
   - 버튼: 단색, Radius 999px, 프라이머리 블루/화이트
   - 배지: `#EFF3FA` 배경 + 블루 텍스트
 
-## 사용자 플로우 개요
-
-1. **온보딩**
-   - 기본 정보 입력(지역, 연령, 직업, 관심사)
-   - 맞춤형 대시보드 초기화
-2. **정보 탐색**
-   - 하이라이트 카드 → 상세 페이지 → 신청 / 공유
-   - 카테고리 탭 → 조건 필터 → 카드 비교
-3. **행동 전환**
-   - 신청/등록 버튼 → 외부 연동 혹은 내부 폼
-   - 즐겨찾기 저장, 리마인더 설정
-4. **사후 관리**
-   - 진행 상태 추적, 알림 및 리마인더 전달
-   - 후기 작성, 추천 정보 자동 업데이트
-
-## 기술 스택 제안
-
-- **프론트엔드**: Next.js, TypeScript, Tailwind CSS(디자인 토큰 연동), Zustand/Redux Toolkit
-- **백엔드**: Node.js(NestJS) 또는 Firebase Functions, GraphQL/REST API
-- **데이터 레이어**: 공공데이터포털 API, 제휴사 API, 크롤러(합법 범위)
-- **인프라**: Vercel(프론트), AWS RDS/DynamoDB, S3, CloudFront
-- **알림**: Firebase Cloud Messaging, 이메일/문자 발송 서비스
-
-## 다음 단계 로드맵
-
-1. **리서치 & 데이터 수집**
-   - 카테고리별 핵심 데이터 소스 조사 및 연계 우선순위 설정
-   - 경쟁 서비스 벤치마크, 사용자 인터뷰
-2. **정보 구조 & 와이어프레임**
-   - Figma에서 모바일·데스크톱 와이어프레임 제작
-   - 사용자 시나리오별 플로우 정의(지원금 찾기, 부업 신청 등)
-3. **디자인 시스템 확정**
-   - 컬러, 타이포, 간격, 컴포넌트 상태 토큰화
-   - 반응형 레이아웃 규칙 및 아이콘 가이드 확립
-4. **프로토타입 & 테스트**
-   - 인터랙티브 프로토타입 제작, 1차 유저 테스트
-   - 피드백 반영 후 UI 정교화
-5. **개발 착수**
-   - 프론트/백엔드 환경 설정, CI/CD 파이프라인 구축
-   - API 설계 및 데이터 연동, 인증 및 알림 기능 구현
-6. **검증 & 출시**
-   - QA, 접근성 검사, 성능 최적화
-   - 베타 런칭 후 모니터링, 데이터 기반 개선
-
 ## 시작하기
 
 ### 필수 요구사항
@@ -106,12 +67,19 @@
 npm install
 ```
 
-2. 개발 서버 실행:
+2. 환경 변수 설정:
+```bash
+# .env.local 파일 생성
+PUBLIC_DATA_API_KEY=your_api_key_here
+CRON_SECRET=your_cron_secret_here
+```
+
+3. 개발 서버 실행:
 ```bash
 npm run dev
 ```
 
-3. 브라우저에서 [http://localhost:3000](http://localhost:3000) 열기
+4. 브라우저에서 [http://localhost:3000](http://localhost:3000) 열기
 
 ### 빌드
 
@@ -122,6 +90,39 @@ npm run build
 npm start
 ```
 
+## API 엔드포인트
+
+### GET /api/government-programs
+정부 지원금/보조금 데이터를 가져옵니다.
+
+**쿼리 파라미터:**
+- `refresh=true`: 데이터를 강제로 새로고침
+
+**응답:**
+```json
+{
+  "programs": [...],
+  "lastUpdated": "2024-01-01T00:00:00.000Z",
+  "total": 10
+}
+```
+
+### POST /api/government-programs/refresh
+데이터를 강제로 새로고침합니다. (Cron Jobs에서 사용)
+
+**헤더:**
+- `Authorization: Bearer {CRON_SECRET}`
+
+## 데이터 자동 갱신
+
+Vercel에 배포하면 `vercel.json`에 설정된 Cron Job이 매일 오전 2시에 자동으로 데이터를 갱신합니다.
+
+수동으로 갱신하려면:
+```bash
+curl -X POST https://your-domain.com/api/government-programs/refresh \
+  -H "Authorization: Bearer {CRON_SECRET}"
+```
+
 ## 프로젝트 구조
 
 ```
@@ -129,15 +130,19 @@ moneypick/
 ├── app/                    # Next.js App Router 페이지
 │   ├── page.tsx           # 홈 페이지
 │   ├── category/          # 카테고리별 페이지
-│   └── search/            # 검색 페이지
+│   ├── search/            # 검색 페이지
+│   └── api/               # API 라우트
+│       └── government-programs/
 ├── components/             # React 컴포넌트
-│   ├── ui/                # 기본 UI 컴포넌트 (Button, Card, Badge)
-│   ├── layout/            # 레이아웃 컴포넌트 (Header, Navigation)
-│   └── cards/             # 카드 컴포넌트 (HighlightCard, InfoCard)
+│   ├── ui/                # 기본 UI 컴포넌트
+│   ├── layout/            # 레이아웃 컴포넌트
+│   └── cards/             # 카드 컴포넌트
+├── lib/                    # 유틸리티 및 데이터 처리
+│   ├── data-collector.ts  # 데이터 수집 로직
+│   ├── data-storage.ts    # 데이터 저장/로드
+│   └── types.ts           # TypeScript 타입 정의
 ├── docs/                  # 문서
-│   ├── design/            # 디자인 가이드 및 와이어프레임
-│   └── plan/              # 계획 문서
-└── public/                # 정적 파일
+└── data/                  # 저장된 데이터 (gitignore)
 ```
 
 ## 주요 기능 구현 현황
@@ -147,10 +152,18 @@ moneypick/
 - ✅ 검색 및 필터 기능
 - ✅ 반응형 디자인 (모바일/태블릿/데스크톱)
 - ✅ 토스 스타일 디자인 시스템 적용
+- ✅ 정부24 데이터 자동 수집 시스템
+- ✅ API 엔드포인트 (데이터 제공 및 갱신)
+- ✅ 자동 갱신 스케줄러 (Vercel Cron Jobs)
 - ⏳ 자격 진단 기능 (예정)
 - ⏳ 즐겨찾기/저장 기능 (예정)
 - ⏳ 알림 기능 (예정)
 - ⏳ 사용자 인증 (예정)
+
+## 데이터 소스
+
+- **정부24**: https://www.gov.kr/portal/rcvfvrSvc/main/nonLogin
+- **공공데이터포털**: https://www.data.go.kr/ (API 키 필요)
 
 ## 관련 문서
 
@@ -158,5 +171,13 @@ moneypick/
 - `/docs/design/ui-wireframes.md` : UI 와이어프레임 가이드
 - `/docs/plan/next-steps.md` : 상세한 다음 단계 실행 계획
 
-기여를 원하신다면 이슈 템플릿을 활용해 개선 아이디어나 새로운 데이터 소스를 제안해주세요.
+## 배포
 
+Vercel에 배포하면 자동으로 Cron Jobs가 설정됩니다:
+
+1. GitHub에 푸시
+2. Vercel에서 프로젝트 연결
+3. 환경 변수 설정 (`PUBLIC_DATA_API_KEY`, `CRON_SECRET`)
+4. 자동 배포 및 Cron Jobs 활성화
+
+기여를 원하신다면 이슈 템플릿을 활용해 개선 아이디어나 새로운 데이터 소스를 제안해주세요.

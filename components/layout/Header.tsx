@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
           {/* 로고 */}
           <div className="flex items-center">
             <a href="/" className="text-heading-m font-bold text-primary hover:opacity-80 transition-opacity">
-              머니픽
+              MoneyPick
             </a>
           </div>
 
