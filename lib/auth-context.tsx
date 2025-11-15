@@ -31,6 +31,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const supabase = createClient();
   const router = useRouter();
 
+  // Supabase 연결 확인
+  useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("⚠️ Supabase 환경 변수가 설정되지 않았습니다!");
+      console.error("NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "설정됨" : "❌ 없음");
+      console.error("NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseKey ? "설정됨" : "❌ 없음");
+    } else {
+      console.log("✅ Supabase 환경 변수 확인됨");
+      console.log("Supabase URL:", supabaseUrl);
+    }
+  }, []);
+
   useEffect(() => {
     // 현재 세션 확인
     const getSession = async () => {
@@ -143,18 +158,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // 로그인
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("🔐 로그인 시도:", email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("❌ 로그인 오류:", error);
+        console.error("오류 코드:", error.status);
+        console.error("오류 메시지:", error.message);
         return { error };
+      }
+
+      if (data?.user) {
+        console.log("✅ 로그인 성공:", data.user.email);
+        await loadUserProfile(data.user.id, data.user);
       }
 
       router.refresh();
       return { error: null };
     } catch (error) {
+      console.error("❌ 로그인 예외:", error);
       return { error: error as Error };
     }
   };
@@ -166,9 +192,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
       const redirectTo = `${baseUrl}/auth/callback`;
       
-      console.log("Google 로그인 리다이렉트 URL:", redirectTo);
+      console.log("🔐 Google 로그인 시도");
+      console.log("현재 origin:", window.location.origin);
+      console.log("환경 변수 BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
+      console.log("리다이렉트 URL:", redirectTo);
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectTo,
@@ -176,12 +205,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error("Google 로그인 오류:", error);
+        console.error("❌ Google 로그인 오류:", error);
+        console.error("오류 코드:", error.status);
+        console.error("오류 메시지:", error.message);
         alert(`로그인 오류: ${error.message}`);
+      } else if (data?.url) {
+        console.log("✅ Google OAuth URL 생성됨, 리다이렉트 중...");
+        // OAuth URL로 리다이렉트 (Supabase가 자동으로 처리하지만 명시적으로 처리)
+        window.location.href = data.url;
       }
     } catch (error) {
-      console.error("Google 로그인 중 오류:", error);
-      alert("로그인 중 오류가 발생했습니다.");
+      console.error("❌ Google 로그인 예외:", error);
+      alert("로그인 중 오류가 발생했습니다. 콘솔을 확인해주세요.");
     }
   };
 
