@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
-export default function SocialAuthPage() {
+function SocialAuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { socialLogin } = useAuth();
@@ -34,6 +34,23 @@ export default function SocialAuthPage() {
         <p className="text-body-m text-text-secondary">로그인 중...</p>
       </div>
     </div>
+  );
+}
+
+export default function SocialAuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-body-m text-text-secondary">로딩 중...</p>
+          </div>
+        </div>
+      }
+    >
+      <SocialAuthContent />
+    </Suspense>
   );
 }
 
