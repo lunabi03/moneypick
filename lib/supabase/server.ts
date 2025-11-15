@@ -3,6 +3,10 @@ import { cookies } from 'next/headers'
 
 export function createClient() {
   const cookieStore = cookies()
+  
+  // Next.js 14+ 쿠키 지연 평가 문제 해결: 쿠키를 강제로 평가
+  // PKCE code verifier 쿠키가 제대로 읽히도록 함
+  cookieStore.getAll()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

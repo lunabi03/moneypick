@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -20,6 +21,11 @@ export async function GET(request: Request) {
 
   if (code) {
     console.log("✅ OAuth 코드 수신됨, 세션 교환 시도...");
+    
+    // Next.js 14+ 쿠키 지연 평가 문제 해결: 쿠키를 강제로 평가
+    const cookieStore = cookies();
+    cookieStore.getAll(); // 쿠키를 강제로 평가하여 code verifier 쿠키가 읽히도록 함
+    
     const supabase = createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
