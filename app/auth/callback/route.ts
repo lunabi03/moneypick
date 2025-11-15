@@ -21,10 +21,23 @@ export async function GET(request: Request) {
 
   if (code) {
     console.log("✅ OAuth 코드 수신됨, 세션 교환 시도...");
+    console.log("OAuth 코드:", code.substring(0, 20) + "...");
     
     // Next.js 14+ 쿠키 지연 평가 문제 해결: 쿠키를 강제로 평가
     const cookieStore = cookies();
-    cookieStore.getAll(); // 쿠키를 강제로 평가하여 code verifier 쿠키가 읽히도록 함
+    const allCookies = cookieStore.getAll(); // 쿠키를 강제로 평가하여 code verifier 쿠키가 읽히도록 함
+    
+    // PKCE code verifier 쿠키 확인
+    const codeVerifierCookie = allCookies.find(cookie => 
+      cookie.name.includes('code-verifier') || cookie.name.includes('verifier')
+    );
+    
+    if (codeVerifierCookie) {
+      console.log("✅ Code verifier 쿠키 발견:", codeVerifierCookie.name);
+    } else {
+      console.warn("⚠️ Code verifier 쿠키를 찾을 수 없습니다!");
+      console.log("사용 가능한 쿠키:", allCookies.map(c => c.name).join(", "));
+    }
     
     const supabase = createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -32,8 +45,13 @@ export async function GET(request: Request) {
     if (error) {
       console.error("❌ 세션 교환 오류:", error);
       console.error("오류 메시지:", error.message);
+      console.error("오류 상태:", error.status);
+      console.error("전체 오류 객체:", JSON.stringify(error, null, 2));
+      
+      // 더 자세한 오류 정보를 URL에 포함
+      const errorDetails = error.message || "세션 교환 중 오류가 발생했습니다";
       return NextResponse.redirect(
-        `${origin}/login?error=${encodeURIComponent(error.message || "세션 교환 중 오류가 발생했습니다")}`
+        `${origin}/login?error=${encodeURIComponent(errorDetails)}`
       );
     }
     

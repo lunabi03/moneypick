@@ -30,21 +30,33 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
+      console.log("📝 로그인 폼 제출:", email);
       const { error } = await signIn(email, password);
       if (error) {
+        console.error("로그인 페이지에서 오류 수신:", error);
         setError(error.message || "이메일과 비밀번호를 확인해주세요.");
       } else {
+        console.log("✅ 로그인 성공, 홈으로 이동");
         router.push("/");
+        router.refresh();
       }
     } catch (err) {
-      setError("로그인 중 오류가 발생했습니다.");
+      console.error("로그인 예외 발생:", err);
+      setError(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSocialLogin = async () => {
-    await signInWithGoogle();
+    try {
+      console.log("🔐 Google 로그인 버튼 클릭");
+      setError("");
+      await signInWithGoogle();
+    } catch (err) {
+      console.error("Google 로그인 예외:", err);
+      setError("Google 로그인 중 오류가 발생했습니다.");
+    }
   };
 
   return (
