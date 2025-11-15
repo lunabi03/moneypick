@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { collectGovernmentPrograms } from "@/lib/data-collector";
 import { savePrograms, loadPrograms, isDataFresh } from "@/lib/data-storage";
-import { GovernmentProgramsResponse } from "@/lib/types";
+import { GovernmentProgram, GovernmentProgramsResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // 1시간마다 재검증
