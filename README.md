@@ -76,31 +76,203 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 GOOGLE_CLIENT_ID=your_google_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 
-# Kakao OAuth (선택사항)
-KAKAO_CLIENT_ID=your_kakao_client_id_here
-KAKAO_CLIENT_SECRET=your_kakao_client_secret_here
-
 # 데이터 수집 (선택사항)
 PUBLIC_DATA_API_KEY=your_api_key_here
 CRON_SECRET=your_cron_secret_here
 ```
 
-### OAuth 설정 (구글/카카오 로그인)
+### OAuth 설정 (구글 로그인)
+
+이 프로젝트는 구글(Google) 소셜 로그인을 지원합니다. Supabase를 사용하는 경우와 직접 구현하는 경우 두 가지 방법이 있습니다.
+
+#### Supabase를 사용한 소셜 로그인 설정
+
+Supabase를 사용하면 인증 관리가 더 간편합니다. Supabase에서 소셜 로그인을 설정하는 방법입니다.
+
+##### 1단계: Supabase 프로젝트 생성 및 설정
+
+1. [Supabase](https://supabase.com/)에 접속하여 계정을 생성하거나 로그인합니다.
+2. **New Project** 버튼을 클릭하여 새 프로젝트를 생성합니다.
+3. 프로젝트 정보 입력:
+   - **Name**: `MoneyPick` (또는 원하는 이름)
+   - **Database Password**: 강력한 비밀번호 설정 (반드시 저장해 두세요)
+   - **Region**: 가장 가까운 리전 선택
+4. 프로젝트가 생성될 때까지 몇 분 기다립니다.
+
+##### 2단계: Supabase 프로젝트 URL 및 콜백 URL 확인
+
+1. 프로젝트 대시보드에서 **Settings** → **API** 메뉴로 이동합니다.
+2. 다음 정보를 확인하고 복사해 둡니다:
+   - **Project URL**: `https://xxxxx.supabase.co` 형식
+   - **anon/public key**: 공개 API 키
+   - **service_role key**: 서비스 역할 키 (서버 사이드에서만 사용)
+3. **Supabase 인증 콜백 URL** 확인:
+   - Project URL에 `/auth/v1/callback`을 추가합니다.
+   - 예: `https://gewhnzsljwravvrxryny.supabase.co/auth/v1/callback`
+   - 이 URL은 Google OAuth 설정 시 **승인된 리디렉션 URI**에 추가해야 합니다.
+
+##### 3단계: Supabase에서 구글 로그인 활성화
+
+1. Supabase 프로젝트 대시보드에서 **Authentication** → **Providers**를 선택합니다.
+2. **Google** 프로바이더를 찾아 **Enable Google** 토글을 켭니다.
+3. 다음 정보를 입력합니다 (아래 "Google OAuth 설정" 섹션에서 생성한 값):
+   - **Client ID (for OAuth)**: Google Cloud Console에서 복사한 클라이언트 ID
+   - **Client Secret (for OAuth)**: Google Cloud Console에서 복사한 클라이언트 보안 비밀번호
+4. **Save** 버튼을 클릭합니다.
+
+##### 4단계: Supabase 리디렉션 URL 설정
+
+1. **Authentication** → **URL Configuration** 메뉴로 이동합니다.
+2. **Redirect URLs** 섹션에 다음 URL들을 추가합니다:
+   ```
+   http://localhost:3000/api/auth/google/callback
+   https://your-domain.com/api/auth/google/callback
+   ```
+3. **Site URL**에 기본 URL을 설정합니다:
+   - 개발: `http://localhost:3000`
+   - 프로덕션: `https://your-domain.com`
+4. **Save** 버튼을 클릭합니다.
+
+##### 5단계: 환경 변수 설정 (Supabase)
+
+프로젝트 루트의 `.env.local` 파일에 다음을 추가합니다:
+
+```bash
+# Supabase 설정
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+
+# Base URL
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
+
+**참고**: Supabase를 사용하는 경우, Google의 Client ID/Secret은 Supabase 대시보드에서 관리하므로 환경 변수에 추가할 필요가 없습니다.
+
+---
+
+#### 직접 구현 방식 (Supabase 미사용)
+
+Supabase를 사용하지 않고 직접 OAuth를 구현하는 경우의 설정 방법입니다.
 
 #### Google OAuth 설정
-1. [Google Cloud Console](https://console.cloud.google.com/)에서 프로젝트 생성
-2. OAuth 2.0 클라이언트 ID 생성
-3. 승인된 리디렉션 URI에 추가: `http://localhost:3000/api/auth/google/callback` (개발), `https://your-domain.com/api/auth/google/callback` (프로덕션)
-4. `.env.local`에 `GOOGLE_CLIENT_ID`와 `GOOGLE_CLIENT_SECRET` 설정
 
-#### Kakao OAuth 설정
-1. [Kakao Developers](https://developers.kakao.com/)에서 앱 생성
-2. 플랫폼 설정에서 사이트 도메인 등록
-3. 카카오 로그인 활성화
-4. Redirect URI 등록: `http://localhost:3000/api/auth/kakao/callback` (개발), `https://your-domain.com/api/auth/kakao/callback` (프로덕션)
-5. `.env.local`에 `KAKAO_CLIENT_ID`와 `KAKAO_CLIENT_SECRET` 설정
+##### 1단계: Google Cloud Console 프로젝트 생성
 
-**참고**: OAuth 설정 없이도 일반 이메일/비밀번호 로그인은 사용할 수 있습니다.
+1. [Google Cloud Console](https://console.cloud.google.com/)에 접속하여 Google 계정으로 로그인합니다.
+2. 상단의 프로젝트 선택 드롭다운에서 **새 프로젝트**를 클릭합니다.
+3. 프로젝트 정보 입력:
+   - **프로젝트 이름**: `MoneyPick` (또는 원하는 이름)
+   - **조직**: 선택사항
+   - **위치**: 선택사항
+4. **만들기** 버튼을 클릭하고 프로젝트가 생성될 때까지 기다립니다 (약 1-2분).
+
+##### 2단계: OAuth 동의 화면 설정
+
+1. 왼쪽 메뉴에서 **API 및 서비스** → **OAuth 동의 화면**을 선택합니다.
+2. **사용자 유형** 선택:
+   - **외부**: 일반 사용자도 사용할 수 있는 앱 (대부분의 경우)
+   - **내부**: Google Workspace 조직 내부용
+   - **외부**를 선택하고 **만들기**를 클릭합니다.
+3. **앱 정보** 입력:
+   - **앱 이름**: `MoneyPick` (또는 원하는 이름)
+   - **사용자 지원 이메일**: 본인의 이메일 주소 선택
+   - **앱 로고**: 선택사항 (256x256px 권장)
+   - **앱 도메인**: 프로덕션 도메인 (예: `https://moneypick.com`)
+   - **개발자 연락처 정보**: 본인의 이메일 주소
+4. **저장 후 계속**을 클릭합니다.
+5. **범위** 단계:
+   - 기본 범위(`email`, `profile`, `openid`)가 자동으로 추가됩니다.
+   - 추가 범위가 필요하면 여기서 추가할 수 있습니다.
+   - **저장 후 계속**을 클릭합니다.
+6. **테스트 사용자** 단계:
+   - 앱이 아직 검토되지 않은 경우, 테스트 사용자로 등록된 계정만 로그인할 수 있습니다.
+   - **+ ADD USERS**를 클릭하여 본인의 이메일 주소를 추가합니다.
+   - **저장 후 계속**을 클릭합니다.
+7. **요약** 단계에서 정보를 확인하고 **대시보드로 돌아가기**를 클릭합니다.
+
+##### 3단계: OAuth 2.0 클라이언트 ID 생성
+
+1. 왼쪽 메뉴에서 **API 및 서비스** → **사용자 인증 정보**를 선택합니다.
+2. 상단의 **+ 사용자 인증 정보 만들기** → **OAuth 클라이언트 ID**를 선택합니다.
+3. **애플리케이션 유형**: **웹 애플리케이션**을 선택합니다.
+4. **이름**: `MoneyPick Web Client` (또는 원하는 이름)를 입력합니다.
+5. **승인된 JavaScript 원본**에 다음 URL들을 각각 추가합니다:
+   ```
+   http://localhost:3000
+   https://your-domain.com
+   ```
+   - 각 URL을 입력한 후 **+ URI 추가**를 클릭합니다.
+6. **승인된 리디렉션 URI**에 다음 URL들을 각각 추가합니다:
+   ```
+   http://localhost:3000/api/auth/google/callback
+   https://your-domain.com/api/auth/google/callback
+   ```
+   - 각 URL을 입력한 후 **+ URI 추가**를 클릭합니다.
+   - **중요**: 정확한 경로(`/api/auth/google/callback`)를 포함해야 합니다.
+7. **만들기** 버튼을 클릭합니다.
+8. 팝업 창에서 다음 정보를 복사해 둡니다:
+   - **클라이언트 ID**: 나중에 환경 변수에 사용
+   - **클라이언트 보안 비밀번호**: 나중에 환경 변수에 사용
+   - **중요**: 클라이언트 보안 비밀번호는 이 창을 닫으면 다시 볼 수 없으므로 반드시 복사해 둡니다.
+
+##### 4단계: 환경 변수 설정
+
+프로젝트 루트의 `.env.local` 파일에 다음을 추가합니다:
+
+```bash
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+```
+
+**예시**:
+```bash
+GOOGLE_CLIENT_ID=123456789-abcdefghijklmnop.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-abcdefghijklmnopqrstuvwxyz
+```
+
+##### 5단계: 테스트
+
+1. 개발 서버를 실행합니다:
+   ```bash
+   npm run dev
+   ```
+2. 브라우저에서 `http://localhost:3000/login`으로 이동합니다.
+3. **구글로 로그인** 버튼을 클릭합니다.
+4. Google 계정 선택 화면이 나타나고, 로그인 후 권한 승인 화면이 표시되어야 합니다.
+5. 권한을 승인하면 리디렉션되어 로그인이 완료됩니다.
+
+**문제 해결**:
+- `redirect_uri_mismatch` 오류: 승인된 리디렉션 URI가 정확히 일치하는지 확인하세요.
+- `access_denied` 오류: OAuth 동의 화면에서 테스트 사용자로 본인 이메일을 추가했는지 확인하세요.
+
+---
+
+#### 프로덕션 환경 설정
+
+프로덕션 환경(Vercel 등)에 배포할 때는 다음을 확인하세요:
+
+1. **환경 변수 설정**:
+   - Vercel 대시보드에서 **Settings** → **Environment Variables**로 이동합니다.
+   - 개발 환경에서 설정한 모든 환경 변수를 추가합니다.
+   - 각 변수에 대해 **Production**, **Preview**, **Development** 환경을 선택합니다.
+
+2. **리디렉션 URI 업데이트**:
+   - Google Cloud Console에서 프로덕션 도메인의 리디렉션 URI를 추가합니다.
+   - 예: `https://your-domain.vercel.app/api/auth/google/callback`
+
+3. **도메인 설정**:
+   - Google OAuth 동의 화면의 앱 도메인을 프로덕션 도메인으로 업데이트합니다.
+
+4. **테스트**:
+   - 프로덕션 환경에서 소셜 로그인이 정상적으로 작동하는지 확인합니다.
+
+---
+
+**참고**: 
+- OAuth 설정 없이도 일반 이메일/비밀번호 로그인은 사용할 수 있습니다.
+- Supabase를 사용하는 경우: `/docs/supabase-social-login-setup.md` 문서를 참고하세요.
+- Supabase를 사용하지 않는 경우: 위의 "직접 구현 방식" 섹션을 따르세요.
 
 3. 개발 서버 실행:
 ```bash
@@ -183,8 +355,8 @@ moneypick/
 - ✅ 정부24 데이터 자동 수집 시스템
 - ✅ API 엔드포인트 (데이터 제공 및 갱신)
 - ✅ 자동 갱신 스케줄러 (Vercel Cron Jobs)
-- ✅ 사용자 인증 (이메일/비밀번호, 구글, 카카오)
-- ✅ 소셜 로그인 (구글, 카카오톡)
+- ✅ 사용자 인증 (이메일/비밀번호, 구글)
+- ✅ 소셜 로그인 (구글)
 - ⏳ 자격 진단 기능 (예정)
 - ⏳ 즐겨찾기/저장 기능 (예정)
 - ⏳ 알림 기능 (예정)
@@ -199,6 +371,7 @@ moneypick/
 - `/docs/design/style-guide.md` : 디자인 시스템 스타일 가이드
 - `/docs/design/ui-wireframes.md` : UI 와이어프레임 가이드
 - `/docs/plan/next-steps.md` : 상세한 다음 단계 실행 계획
+- `/docs/supabase-social-login-setup.md` : Supabase 구글 로그인 설정 가이드
 
 ## 배포
 
@@ -206,7 +379,24 @@ Vercel에 배포하면 자동으로 Cron Jobs가 설정됩니다:
 
 1. GitHub에 푸시
 2. Vercel에서 프로젝트 연결
-3. 환경 변수 설정 (`PUBLIC_DATA_API_KEY`, `CRON_SECRET`)
+3. **환경 변수 설정** (아래 참고)
 4. 자동 배포 및 Cron Jobs 활성화
+
+### Vercel 환경 변수 설정
+
+Vercel 대시보드 → **Settings** → **Environment Variables**에서 다음 변수들을 추가하세요:
+
+#### 필수 환경 변수
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase 프로젝트 URL (Settings → API에서 확인)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase 공개 API 키 (Settings → API에서 확인)
+
+#### 권장 환경 변수
+- `NEXT_PUBLIC_BASE_URL`: 프로덕션 도메인 URL (예: `https://your-project.vercel.app`)
+
+#### 선택사항 환경 변수
+- `PUBLIC_DATA_API_KEY`: 공공데이터포털 API 키 (데이터 수집용)
+- `CRON_SECRET`: Cron Job 인증 키 (임의의 긴 문자열)
+
+**자세한 설정 방법**: `/docs/vercel-environment-variables.md` 문서를 참고하세요.
 
 기여를 원하신다면 이슈 템플릿을 활용해 개선 아이디어나 새로운 데이터 소스를 제안해주세요.

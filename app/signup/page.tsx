@@ -14,7 +14,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, socialLogin } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,13 +34,14 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      // 회원가입 로직 (실제로는 서버 API 호출)
-      // 데모용: 회원가입 후 자동 로그인
-      const success = await login(email, password, name);
-      if (success) {
-        router.push("/");
+      const { error } = await signUp(email, password, name);
+      if (error) {
+        setError(error.message || "회원가입 중 오류가 발생했습니다.");
       } else {
-        setError("회원가입 중 오류가 발생했습니다.");
+        // 회원가입 성공 시 이메일 확인 안내
+        setError("");
+        alert("회원가입이 완료되었습니다. 이메일을 확인해주세요.");
+        router.push("/login");
       }
     } catch (err) {
       setError("회원가입 중 오류가 발생했습니다.");
@@ -49,9 +50,8 @@ export default function SignupPage() {
     }
   };
 
-  const handleSocialLogin = (provider: "google" | "kakao") => {
-    // OAuth 인증 URL로 리다이렉트
-    window.location.href = `/api/auth/${provider}`;
+  const handleSocialLogin = async () => {
+    await signInWithGoogle();
   };
 
   return (
@@ -72,7 +72,7 @@ export default function SignupPage() {
               variant="secondary"
               size="lg"
               className="w-full flex items-center justify-center gap-3 whitespace-nowrap"
-              onClick={() => handleSocialLogin("google")}
+              onClick={handleSocialLogin}
             >
               <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
                 <path
@@ -93,17 +93,6 @@ export default function SignupPage() {
                 />
               </svg>
               <span>구글로 시작하기</span>
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="w-full flex items-center justify-center gap-3 bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] border-[#FEE500] whitespace-nowrap"
-              onClick={() => handleSocialLogin("kakao")}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3C6.48 3 2 6.13 2 10c0 2.38 1.91 4.5 4.84 5.82L6 21l5.5-3.5c.5.05 1 .08 1.5.08 5.52 0 10-3.13 10-7s-4.48-7-10-7z" />
-              </svg>
-              <span>카카오톡으로 시작하기</span>
             </Button>
           </div>
 

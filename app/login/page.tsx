@@ -12,7 +12,7 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -30,11 +30,11 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        router.push("/");
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError(error.message || "이메일과 비밀번호를 확인해주세요.");
       } else {
-        setError("이메일과 비밀번호를 확인해주세요.");
+        router.push("/");
       }
     } catch (err) {
       setError("로그인 중 오류가 발생했습니다.");
@@ -43,9 +43,8 @@ function LoginContent() {
     }
   };
 
-  const handleSocialLogin = (provider: "google" | "kakao") => {
-    // OAuth 인증 URL로 리다이렉트
-    window.location.href = `/api/auth/${provider}`;
+  const handleSocialLogin = async () => {
+    await signInWithGoogle();
   };
 
   return (
@@ -66,7 +65,7 @@ function LoginContent() {
               variant="secondary"
               size="lg"
               className="w-full flex items-center justify-center gap-3 whitespace-nowrap"
-              onClick={() => handleSocialLogin("google")}
+              onClick={handleSocialLogin}
             >
               <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
                 <path
@@ -87,17 +86,6 @@ function LoginContent() {
                 />
               </svg>
               <span>구글로 로그인</span>
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="w-full flex items-center justify-center gap-3 bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] border-[#FEE500] whitespace-nowrap"
-              onClick={() => handleSocialLogin("kakao")}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3C6.48 3 2 6.13 2 10c0 2.38 1.91 4.5 4.84 5.82L6 21l5.5-3.5c.5.05 1 .08 1.5.08 5.52 0 10-3.13 10-7s-4.48-7-10-7z" />
-              </svg>
-              <span>카카오톡으로 로그인</span>
             </Button>
           </div>
 

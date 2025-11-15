@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -150,10 +150,9 @@ export const Header: React.FC = () => {
                       <p className="text-caption text-text-muted">{user.email}</p>
                     </div>
                     <button
-                      onClick={() => {
-                        logout();
+                      onClick={async () => {
+                        await signOut();
                         setProfileMenuOpen(false);
-                        router.push("/");
                       }}
                       className="w-full text-left px-4 py-2 text-body-s text-text-secondary hover:bg-badge transition-colors"
                     >
