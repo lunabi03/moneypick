@@ -197,10 +197,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("환경 변수 BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
       console.log("리다이렉트 URL:", redirectTo);
       
+      // 브라우저 쿠키 확인 (디버깅용)
+      const allCookies = document.cookie.split(';').map(c => c.trim());
+      console.log("현재 브라우저 쿠키:", allCookies);
+      const supabaseCookies = allCookies.filter(c => c.includes('sb-'));
+      console.log("Supabase 관련 쿠키:", supabaseCookies);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
@@ -211,8 +221,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         alert(`로그인 오류: ${error.message}`);
       } else if (data?.url) {
         console.log("✅ Google OAuth URL 생성됨, 리다이렉트 중...");
+        console.log("OAuth URL:", data.url);
+        
+        // 리다이렉트 전 쿠키 다시 확인
+        setTimeout(() => {
+          const cookiesAfter = document.cookie.split(';').map(c => c.trim());
+          const supabaseCookiesAfter = cookiesAfter.filter(c => c.includes('sb-'));
+          console.log("리다이렉트 전 Supabase 쿠키:", supabaseCookiesAfter);
+        }, 100);
+        
         // OAuth URL로 리다이렉트 (Supabase가 자동으로 처리하지만 명시적으로 처리)
         window.location.href = data.url;
+      } else {
+        console.warn("⚠️ OAuth URL이 생성되지 않았습니다");
+        console.log("응답 데이터:", data);
       }
     } catch (error) {
       console.error("❌ Google 로그인 예외:", error);
