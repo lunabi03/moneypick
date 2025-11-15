@@ -125,12 +125,13 @@ Supabase를 사용하면 인증 관리가 더 간편합니다. Supabase에서 �
 1. **Authentication** → **URL Configuration** 메뉴로 이동합니다.
 2. **Redirect URLs** 섹션에 다음 URL들을 추가합니다:
    ```
-   http://localhost:3000/api/auth/google/callback
-   https://your-domain.com/api/auth/google/callback
+   http://localhost:3000/auth/callback
+   https://your-project.vercel.app/auth/callback
    ```
+   ⚠️ **중요**: `your-project.vercel.app`을 실제 Vercel 프로젝트 도메인으로 변경하세요!
 3. **Site URL**에 기본 URL을 설정합니다:
    - 개발: `http://localhost:3000`
-   - 프로덕션: `https://your-domain.com`
+   - 프로덕션: `https://your-project.vercel.app` (실제 Vercel 도메인으로 변경)
 4. **Save** 버튼을 클릭합니다.
 
 ##### 5단계: 환경 변수 설정 (Supabase)
@@ -257,12 +258,29 @@ GOOGLE_CLIENT_SECRET=GOCSPX-abcdefghijklmnopqrstuvwxyz
    - 개발 환경에서 설정한 모든 환경 변수를 추가합니다.
    - 각 변수에 대해 **Production**, **Preview**, **Development** 환경을 선택합니다.
 
-2. **리디렉션 URI 업데이트**:
-   - Google Cloud Console에서 프로덕션 도메인의 리디렉션 URI를 추가합니다.
-   - 예: `https://your-domain.vercel.app/api/auth/google/callback`
+2. **Supabase 리디렉션 URL 설정** (⚠️ **가장 중요**):
+   - Supabase 대시보드 → **Authentication** → **URL Configuration**으로 이동합니다.
+   - **Site URL** 필드를 확인하고 프로덕션 도메인으로 설정합니다:
+     ```
+     https://your-project.vercel.app
+     ```
+     ⚠️ **Site URL이 `http://localhost:3000`으로 되어 있으면 프로덕션에서 localhost로 리다이렉트됩니다!**
+   - **Redirect URLs** 섹션에 다음 URL들을 추가합니다:
+     ```
+     http://localhost:3000/auth/callback
+     https://your-project.vercel.app/auth/callback
+     ```
+     ⚠️ `your-project.vercel.app`을 실제 Vercel 프로젝트 도메인으로 변경하세요!
+   - 각 URL을 한 줄씩 입력하고 **+ Add** 버튼을 클릭합니다.
+   - **Save** 버튼을 클릭합니다.
 
-3. **도메인 설정**:
-   - Google OAuth 동의 화면의 앱 도메인을 프로덕션 도메인으로 업데이트합니다.
+3. **Google Cloud Console 리디렉션 URI 업데이트** (Supabase 사용 시):
+   - Google Cloud Console → **API 및 서비스** → **사용자 인증 정보**로 이동합니다.
+   - OAuth 클라이언트의 **승인된 리디렉션 URI**에 Supabase 콜백 URL이 이미 추가되어 있는지 확인합니다:
+     ```
+     https://xxxxx.supabase.co/auth/v1/callback
+     ```
+   - 이 URL은 Supabase가 자동으로 처리하므로, 웹사이트의 프로덕션 URL을 추가할 필요는 없습니다.
 
 4. **테스트**:
    - 프로덕션 환경에서 소셜 로그인이 정상적으로 작동하는지 확인합니다.

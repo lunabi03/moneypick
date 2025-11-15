@@ -126,9 +126,10 @@ https://[project-ref].supabase.co/auth/v1/callback
 1. **Authentication** → **URL Configuration** 메뉴로 이동합니다.
 2. **Redirect URLs** 섹션에 다음 URL을 추가합니다:
    ```
-   http://localhost:3000/api/auth/google/callback
-   https://your-domain.com/api/auth/google/callback
+   http://localhost:3000/auth/callback
+   https://your-project.vercel.app/auth/callback
    ```
+   ⚠️ **중요**: `your-project.vercel.app`을 실제 Vercel 프로젝트 도메인으로 변경하세요!
 3. **Save** 버튼을 클릭합니다.
 
 ---
@@ -335,6 +336,41 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 1. `NEXT_PUBLIC_BASE_URL` 환경 변수가 올바르게 설정되었는지 확인합니다.
 2. 브라우저 콘솔에서 오류 메시지를 확인합니다.
 3. 네트워크 탭에서 API 요청이 성공했는지 확인합니다.
+
+**문제**: 프로덕션에서 로그인 시 localhost로 리다이렉트됩니다.
+
+**해결 방법** (⚠️ **가장 중요**):
+1. **Supabase Site URL 확인 및 수정**:
+   - Supabase 대시보드 → **Authentication** → **URL Configuration**으로 이동합니다.
+   - **Site URL** 필드를 확인합니다.
+   - 프로덕션 환경에서는 반드시 프로덕션 도메인으로 설정해야 합니다:
+     ```
+     https://your-project.vercel.app
+     ```
+   - ⚠️ **Site URL이 `http://localhost:3000`으로 되어 있으면 프로덕션에서 localhost로 리다이렉트됩니다!**
+   - **Save** 버튼을 클릭합니다.
+
+2. **Redirect URLs 확인**:
+   - 같은 페이지에서 **Redirect URLs** 섹션을 확인합니다.
+   - 다음 URL들이 모두 추가되어 있는지 확인:
+     ```
+     http://localhost:3000/auth/callback
+     https://your-project.vercel.app/auth/callback
+     ```
+   - 각 URL을 한 줄씩 입력하고 **+ Add** 버튼을 클릭합니다.
+   - **Save** 버튼을 클릭합니다.
+
+3. **Vercel 환경 변수 확인**:
+   - Vercel 대시보드 → **Settings** → **Environment Variables**로 이동합니다.
+   - `NEXT_PUBLIC_BASE_URL`이 프로덕션 도메인으로 설정되어 있는지 확인:
+     ```
+     NEXT_PUBLIC_BASE_URL=https://your-project.vercel.app
+     ```
+   - 환경 변수 수정 후 **Redeploy**가 필요합니다.
+
+4. **캐시 클리어 및 재배포**:
+   - Supabase 설정 변경 후 브라우저 캐시를 지웁니다.
+   - Vercel에서 프로젝트를 **Redeploy**합니다.
 
 ---
 
