@@ -189,7 +189,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       // 현재 origin을 사용하되, 환경 변수가 있으면 우선 사용
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+      // 환경 변수 끝의 슬래시 제거
+      const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || window.location.origin).replace(/\/$/, '');
       const redirectTo = `${baseUrl}/auth/callback`;
       
       console.log("🔐 Google 로그인 시도");
