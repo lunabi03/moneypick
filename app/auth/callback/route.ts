@@ -54,8 +54,6 @@ export async function GET(request: Request) {
     
     // Request에서 직접 쿠키를 읽어서 Supabase 클라이언트 생성
     // 이렇게 하면 쿠키 지연 평가 문제를 완전히 우회할 수 있음
-    const cookieStore = cookies();
-    cookieStore.getAll(); // 쿠키 강제 평가
     
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
