@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -23,23 +23,66 @@ export async function GET(request: Request) {
     console.log("✅ OAuth 코드 수신됨, 세션 교환 시도...");
     console.log("OAuth 코드:", code.substring(0, 20) + "...");
     
+    // Request에서 직접 쿠키 읽기 (Next.js 14+ 쿠키 지연 평가 문제 해결)
+    const requestHeaders = request.headers;
+    const cookieHeader = requestHeaders.get("cookie") || "";
+    console.log("요청 쿠키 헤더:", cookieHeader ? "있음" : "없음");
+    
     // Next.js 14+ 쿠키 지연 평가 문제 해결: 쿠키를 강제로 평가
     const cookieStore = cookies();
     const allCookies = cookieStore.getAll(); // 쿠키를 강제로 평가하여 code verifier 쿠키가 읽히도록 함
     
-    // PKCE code verifier 쿠키 확인
+    // PKCE code verifier 쿠키 확인 (Supabase는 sb-{project-ref}-auth-token-code-verifier 형식 사용)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || "";
+    const codeVerifierCookieName = `sb-${projectRef}-auth-token-code-verifier`;
+    
     const codeVerifierCookie = allCookies.find(cookie => 
-      cookie.name.includes('code-verifier') || cookie.name.includes('verifier')
+      cookie.name === codeVerifierCookieName || 
+      cookie.name.includes('code-verifier') || 
+      cookie.name.includes('verifier')
     );
     
     if (codeVerifierCookie) {
       console.log("✅ Code verifier 쿠키 발견:", codeVerifierCookie.name);
     } else {
       console.warn("⚠️ Code verifier 쿠키를 찾을 수 없습니다!");
+      console.log("예상 쿠키 이름:", codeVerifierCookieName);
       console.log("사용 가능한 쿠키:", allCookies.map(c => c.name).join(", "));
+      console.log("요청 쿠키 헤더에서 확인:", cookieHeader.includes('code-verifier') || cookieHeader.includes('verifier') ? "발견됨" : "없음");
     }
     
-    const supabase = createClient();
+    // Request에서 직접 쿠키를 읽어서 Supabase 클라이언트 생성
+    // 이렇게 하면 쿠키 지연 평가 문제를 완전히 우회할 수 있음
+    const cookieStore = cookies();
+    cookieStore.getAll(); // 쿠키 강제 평가
+    
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              // Server Component에서 set 호출 시 무시
+            }
+          },
+          remove(name: string, options: CookieOptions) {
+            try {
+              cookieStore.set({ name, value: '', ...options });
+            } catch (error) {
+              // Server Component에서 remove 호출 시 무시
+            }
+          },
+        },
+      }
+    );
+    
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (error) {
